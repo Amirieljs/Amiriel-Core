@@ -1,6 +1,12 @@
-# Amiriel
+<p align="center">
+  <img src="https://amiriel.com/logo/amiriel_256x256.webp" alt="Amiriel logo" width="96" height="96" />
+</p>
 
-Framework-agnostic TypeScript core for Amiriel letter documents.
+<h1 align="center">Amiriel</h1>
+
+<p align="center">
+  Framework-agnostic TypeScript core for Amiriel letter documents.
+</p>
 
 `amiriel` is the shared model and rules layer used by framework packages such as
 [`@amiriel/vue`](https://github.com/Amirieljs/Amiriel-Vue) for Vue and
@@ -15,7 +21,7 @@ code.
 ## Features
 
 - Shared Amiriel document types
-- Document normalization and legacy document migration helpers
+- Document normalization helpers
 - Paper size constraints and media placement math
 - Built-in themes and CSS variable generation
 - English and Chinese UI label helpers
@@ -24,19 +30,11 @@ code.
 
 ## Install
 
-Pre-release builds are published under the `beta` dist-tag:
-
 ```bash
 npm install amiriel@beta
 pnpm add amiriel@beta
 yarn add amiriel@beta
 bun add amiriel@beta
-```
-
-After the first stable release, install without the tag:
-
-```bash
-npm install amiriel
 ```
 
 ## Usage
@@ -56,7 +54,7 @@ const document: AmirielDocument = normalizeDocument({
 
 ### Custom id generation
 
-`normalizeDocument` may need to create page or placement ids for legacy input.
+`normalizeDocument` may assign page or placement ids when input omits them.
 In modern Node.js and browsers it uses `crypto.randomUUID()` when available.
 You can also pass your own id factory:
 
@@ -97,7 +95,7 @@ const labels = resolveAmirielLabels("zh", {
 | Export | Description |
 | --- | --- |
 | Document types | `AmirielDocument`, `AmirielPage`, `AmirielMedia`, and related shapes |
-| `normalizeDocument` | Normalize and migrate legacy document input |
+| `normalizeDocument` | Normalize document input into the shared Amiriel shape |
 | Theme helpers | Built-in theme definitions, CSS variable generation, and merge utilities |
 | Label helpers | Built-in English and Chinese UI labels with partial overrides |
 | Placement math | Paper sizing, media placement, and text block normalization utilities |
@@ -114,25 +112,6 @@ Framework packages should depend on this core package instead of duplicating
 document normalization, theme definitions, labels, and placement math.
 
 The full hosted product lives at [amiriel.com](https://amiriel.com).
-
-## Migration From Earlier Betas
-
-Earlier beta releases used the unscoped `amiriel` package name for the Vue
-implementation. Starting with this package split, `amiriel` is reserved for the
-framework-agnostic core and the Vue implementation is published as
-`@amiriel/vue`.
-
-Vue users should migrate imports like this:
-
-```diff
-- import { AmirielBodyEditor } from "amiriel";
-- import "amiriel/style.css";
-+ import { AmirielBodyEditor } from "@amiriel/vue";
-+ import "@amiriel/vue/style.css";
-```
-
-Because npm package versions are immutable, publish this core package under a
-new version after the final Vue package release that used the `amiriel` name.
 
 ## Release Sync
 
