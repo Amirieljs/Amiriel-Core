@@ -1,6 +1,6 @@
 {
-  "name": "@amiriel/core",
-  "version": "0.0.1-beta.5",
+  "name": "amiriel",
+  "version": "0.0.1-beta.6",
   "description": "Framework-agnostic TypeScript core for Amiriel letter documents.",
   "type": "module",
   "license": "MIT",

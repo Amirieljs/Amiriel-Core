@@ -1,10 +1,16 @@
-# Amiriel Core
+# Amiriel
 
 Framework-agnostic TypeScript core for Amiriel letter documents.
 
-`@amiriel/core` is the shared model and rules layer used by framework packages
-such as `amiriel` for Vue and `@amiriel/react` for React. It contains no UI
-framework, DOM, storage, authentication, routing, or database code.
+`amiriel` is the shared model and rules layer used by framework packages such as
+[`@amiriel/vue`](https://github.com/Amirieljs/Amiriel-Vue) for Vue and
+[`@amiriel/react`](https://github.com/Amirieljs/Amiriel-React) for React. It
+contains no UI framework, DOM, storage, authentication, routing, or database
+code.
+
+[![npm version (beta)](https://img.shields.io/npm/v/amiriel/beta?style=flat-square)](https://www.npmjs.com/package/amiriel)
+[![license](https://img.shields.io/npm/l/amiriel?style=flat-square)](https://www.npmjs.com/package/amiriel)
+[![TypeScript](https://img.shields.io/badge/typescript-ready-3178C6?style=flat-square&logo=typescript&logoColor=white)]()
 
 ## Features
 
@@ -14,23 +20,23 @@ framework, DOM, storage, authentication, routing, or database code.
 - Built-in themes and CSS variable generation
 - English and Chinese UI label helpers
 - Font, text color, and video duration utilities
-- Node.js-native ESM package with TypeScript declarations
+- Framework-agnostic ESM package with TypeScript declarations
 
 ## Install
 
 Pre-release builds are published under the `beta` dist-tag:
 
 ```bash
-npm install @amiriel/core@beta
-pnpm add @amiriel/core@beta
-yarn add @amiriel/core@beta
-bun add @amiriel/core@beta
+npm install amiriel@beta
+pnpm add amiriel@beta
+yarn add amiriel@beta
+bun add amiriel@beta
 ```
 
 After the first stable release, install without the tag:
 
 ```bash
-npm install @amiriel/core
+npm install amiriel
 ```
 
 ## Usage
@@ -39,7 +45,7 @@ npm install @amiriel/core
 import {
   normalizeDocument,
   type AmirielDocument,
-} from "@amiriel/core";
+} from "amiriel";
 
 const document: AmirielDocument = normalizeDocument({
   theme: "midnight",
@@ -55,7 +61,7 @@ In modern Node.js and browsers it uses `crypto.randomUUID()` when available.
 You can also pass your own id factory:
 
 ```ts
-import { normalizeDocument } from "@amiriel/core";
+import { normalizeDocument } from "amiriel";
 
 const document = normalizeDocument(input, {
   createId: () => `doc-${Date.now()}`,
@@ -64,11 +70,13 @@ const document = normalizeDocument(input, {
 
 ### Themes
 
+Built-in themes: `midnight`, `paper`, `memorial`.
+
 ```ts
 import {
   amirielThemeCssVars,
   findAmirielThemeDefinition,
-} from "@amiriel/core";
+} from "amiriel";
 
 const theme = findAmirielThemeDefinition("paper");
 const cssVars = amirielThemeCssVars(theme);
@@ -77,23 +85,54 @@ const cssVars = amirielThemeCssVars(theme);
 ### Labels
 
 ```ts
-import { resolveAmirielLabels } from "@amiriel/core";
+import { resolveAmirielLabels } from "amiriel";
 
 const labels = resolveAmirielLabels("zh", {
   uploadMedia: "选择照片或视频",
 });
 ```
 
+## Main Exports
+
+| Export | Description |
+| --- | --- |
+| Document types | `AmirielDocument`, `AmirielPage`, `AmirielMedia`, and related shapes |
+| `normalizeDocument` | Normalize and migrate legacy document input |
+| Theme helpers | Built-in theme definitions, CSS variable generation, and merge utilities |
+| Label helpers | Built-in English and Chinese UI labels with partial overrides |
+| Placement math | Paper sizing, media placement, and text block normalization utilities |
+
 ## Package Architecture
 
-The recommended split is:
+Amiriel is split into three packages:
 
-- `@amiriel/core`: shared Node.js/TypeScript model and rules
-- `amiriel`: Vue 3 implementation
-- `@amiriel/react`: React implementation
+- [`amiriel`](https://github.com/Amirieljs/Amiriel): shared framework-agnostic TypeScript model and rules (this repository)
+- [`@amiriel/vue`](https://github.com/Amirieljs/Amiriel-Vue): Vue 3 implementation
+- [`@amiriel/react`](https://github.com/Amirieljs/Amiriel-React): React implementation
 
 Framework packages should depend on this core package instead of duplicating
 document normalization, theme definitions, labels, and placement math.
+
+The full hosted product lives at [amiriel.com](https://amiriel.com).
+
+## Migration From Earlier Betas
+
+Earlier beta releases used the unscoped `amiriel` package name for the Vue
+implementation. Starting with this package split, `amiriel` is reserved for the
+framework-agnostic core and the Vue implementation is published as
+`@amiriel/vue`.
+
+Vue users should migrate imports like this:
+
+```diff
+- import { AmirielBodyEditor } from "amiriel";
+- import "amiriel/style.css";
++ import { AmirielBodyEditor } from "@amiriel/vue";
++ import "@amiriel/vue/style.css";
+```
+
+Because npm package versions are immutable, publish this core package under a
+new version after the final Vue package release that used the `amiriel` name.
 
 ## Release Sync
 
@@ -106,11 +145,12 @@ repository:
   `Amirieljs/Amiriel-Vue` and `Amirieljs/Amiriel-React`
 
 The Vue and React repositories listen for the `core-release` dispatch event,
-upgrade `@amiriel/core`, run checks, bump their own beta version, publish to
-npm, and create a GitHub release.
+upgrade `amiriel`, run checks, bump their own beta version, publish to npm, and
+create a GitHub release.
 
 ## License
 
-MIT. The editor packages are open source and can be used commercially. The
-official hosted Amiriel product may still provide paid services around storage,
-accounts, delivery, hosting, collaboration, or other product workflows.
+MIT. The core package is open source and can be used commercially. The official
+hosted Amiriel product at [amiriel.com](https://amiriel.com) may still provide
+paid services around storage, accounts, delivery, hosting, collaboration, or
+other product workflows.
