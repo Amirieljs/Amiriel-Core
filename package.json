@@ -1,17 +1,20 @@
 {
-  "name": "amiriel",
+  "name": "@amiriel/core",
   "version": "0.0.1-beta.6",
   "description": "Framework-agnostic TypeScript core for Amiriel letter documents.",
   "type": "module",
   "license": "MIT",
   "homepage": "https://amiriel.com",
   "packageManager": "pnpm@11.7.0",
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Amirieljs/Amiriel.git"
+    "url": "git+https://github.com/Amirieljs/Amiriel-Core.git"
   },
   "bugs": {
-    "url": "https://github.com/Amirieljs/Amiriel/issues"
+    "url": "https://github.com/Amirieljs/Amiriel-Core/issues"
   },
   "keywords": [
     "amiriel",

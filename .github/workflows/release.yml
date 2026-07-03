@@ -71,7 +71,7 @@ jobs:
             exit 0
           fi
           CORE_VERSION="${VERSION#v}"
-          for REPO in Amiriel-Vue Amiriel-React; do
+          for REPO in Amiriel Amiriel-Vue Amiriel-React Amiriel-Vanilla; do
             curl -fsS -X POST \
               -H "Accept: application/vnd.github+json" \
               -H "Authorization: Bearer ${TOKEN}" \

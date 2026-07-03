@@ -2,21 +2,23 @@
   <img src="https://amiriel.com/logo/amiriel_256x256.webp" alt="Amiriel logo" width="96" height="96" />
 </p>
 
-<h1 align="center">Amiriel</h1>
+<h1 align="center">@amiriel/core</h1>
 
 <p align="center">
   Framework-agnostic TypeScript core for Amiriel letter documents.
 </p>
 
-`amiriel` is the shared model and rules layer used by framework packages such as
+`@amiriel/core` is the shared model and rules layer used by framework packages such as
 [`@amiriel/vue`](https://github.com/Amirieljs/Amiriel-Vue) for Vue and
 [`@amiriel/react`](https://github.com/Amirieljs/Amiriel-React) for React. It
 contains no UI framework, DOM, storage, authentication, routing, or database
 code.
 
-[![npm version (beta)](https://img.shields.io/npm/v/amiriel/beta?style=flat-square)](https://www.npmjs.com/package/amiriel)
-[![license](https://img.shields.io/npm/l/amiriel?style=flat-square)](https://www.npmjs.com/package/amiriel)
+[![npm version (beta)](https://img.shields.io/npm/v/@amiriel/core/beta?style=flat-square)](https://www.npmjs.com/package/@amiriel/core)
+[![license](https://img.shields.io/npm/l/@amiriel/core?style=flat-square)](https://www.npmjs.com/package/@amiriel/core)
 [![TypeScript](https://img.shields.io/badge/typescript-ready-3178C6?style=flat-square&logo=typescript&logoColor=white)]()
+
+Prefer the short package name? Install [`amiriel`](https://www.npmjs.com/package/amiriel) instead — it re-exports everything from this package.
 
 ## Features
 
@@ -31,10 +33,16 @@ code.
 ## Install
 
 ```bash
+npm install @amiriel/core@beta
+pnpm add @amiriel/core@beta
+yarn add @amiriel/core@beta
+bun add @amiriel/core@beta
+```
+
+Or use the meta package:
+
+```bash
 npm install amiriel@beta
-pnpm add amiriel@beta
-yarn add amiriel@beta
-bun add amiriel@beta
 ```
 
 ## Usage
@@ -43,7 +51,7 @@ bun add amiriel@beta
 import {
   normalizeDocument,
   type AmirielDocument,
-} from "amiriel";
+} from "@amiriel/core";
 
 const document: AmirielDocument = normalizeDocument({
   theme: "midnight",
@@ -59,7 +67,7 @@ In modern Node.js and browsers it uses `crypto.randomUUID()` when available.
 You can also pass your own id factory:
 
 ```ts
-import { normalizeDocument } from "amiriel";
+import { normalizeDocument } from "@amiriel/core";
 
 const document = normalizeDocument(input, {
   createId: () => `doc-${Date.now()}`,
@@ -74,7 +82,7 @@ Built-in themes: `midnight`, `paper`, `memorial`.
 import {
   amirielThemeCssVars,
   findAmirielThemeDefinition,
-} from "amiriel";
+} from "@amiriel/core";
 
 const theme = findAmirielThemeDefinition("paper");
 const cssVars = amirielThemeCssVars(theme);
@@ -83,7 +91,7 @@ const cssVars = amirielThemeCssVars(theme);
 ### Labels
 
 ```ts
-import { resolveAmirielLabels } from "amiriel";
+import { resolveAmirielLabels } from "@amiriel/core";
 
 const labels = resolveAmirielLabels("zh", {
   uploadMedia: "选择照片或视频",
@@ -102,29 +110,32 @@ const labels = resolveAmirielLabels("zh", {
 
 ## Package Architecture
 
-Amiriel is split into three packages:
+| npm package | Repository | Role |
+| --- | --- | --- |
+| `@amiriel/core` | [Amirieljs/Amiriel-Core](https://github.com/Amirieljs/Amiriel-Core) | Framework-agnostic core (this repo) |
+| `amiriel` | [Amirieljs/Amiriel](https://github.com/Amirieljs/Amiriel) | Meta package re-exporting `@amiriel/core` |
+| `@amiriel/vue` | [Amirieljs/Amiriel-Vue](https://github.com/Amirieljs/Amiriel-Vue) | Vue 3 implementation |
+| `@amiriel/react` | [Amirieljs/Amiriel-React](https://github.com/Amirieljs/Amiriel-React) | React implementation |
+| `@amiriel/vanilla` | [Amirieljs/Amiriel-Vanilla](https://github.com/Amirieljs/Amiriel-Vanilla) | Vanilla JS implementation |
 
-- [`amiriel`](https://github.com/Amirieljs/Amiriel): shared framework-agnostic TypeScript model and rules (this repository)
-- [`@amiriel/vue`](https://github.com/Amirieljs/Amiriel-Vue): Vue 3 implementation
-- [`@amiriel/react`](https://github.com/Amirieljs/Amiriel-React): React implementation
-
-Framework packages should depend on this core package instead of duplicating
-document normalization, theme definitions, labels, and placement math.
+Framework packages depend on `@amiriel/core` for document normalization, theme
+definitions, labels, and placement math.
 
 The full hosted product lives at [amiriel.com](https://amiriel.com).
 
 ## Release Sync
 
-When this repository publishes a new version, the release workflow can dispatch
-sync events to the Vue and React repositories. Configure these secrets in this
-repository:
+When this repository publishes a new version, the release workflow dispatches
+sync events to the meta package and framework repositories. Configure these
+secrets in this repository:
 
 - `NPM_TOKEN`: npm automation token used for publishing
 - `AMIRIELJS_SYNC_TOKEN`: GitHub token with access to dispatch workflows in
-  `Amirieljs/Amiriel-Vue` and `Amirieljs/Amiriel-React`
+  `Amirieljs/Amiriel`, `Amirieljs/Amiriel-Vue`, `Amirieljs/Amiriel-React`, and
+  `Amirieljs/Amiriel-Vanilla`
 
-The Vue and React repositories listen for the `core-release` dispatch event,
-upgrade `amiriel`, run checks, bump their own beta version, publish to npm, and
+Downstream repositories listen for the `core-release` dispatch event, upgrade
+`@amiriel/core`, run checks, bump their own beta version, publish to npm, and
 create a GitHub release.
 
 ## License
