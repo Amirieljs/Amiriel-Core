@@ -123,21 +123,6 @@ definitions, labels, and placement math.
 
 The full hosted product lives at [amiriel.com](https://amiriel.com).
 
-## Release Sync
-
-When this repository publishes a new version, the release workflow dispatches
-sync events to the meta package and framework repositories. Configure these
-secrets in this repository:
-
-- `NPM_TOKEN`: npm automation token used for publishing
-- `AMIRIELJS_SYNC_TOKEN`: GitHub token with access to dispatch workflows in
-  `Amirieljs/Amiriel`, `Amirieljs/Amiriel-Vue`, `Amirieljs/Amiriel-React`, and
-  `Amirieljs/Amiriel-Vanilla`
-
-Downstream repositories listen for the `core-release` dispatch event, upgrade
-`@amiriel/core`, run checks, bump their own beta version, publish to npm, and
-create a GitHub release.
-
 ## License
 
 MIT. The core package is open source and can be used commercially. The official
