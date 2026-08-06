@@ -1,5 +1,8 @@
 name: Release
 
+# 职责：发布 @amiriel/core，并向下游 dispatch（Sync Core 会自行完整发 npm）。
+# 下游不依赖本仓再触发它们的 Release。
+
 on:
   push:
     tags:
@@ -63,6 +66,18 @@ jobs:
           if [ "${{ steps.release.outputs.is_prerelease }}" = "true" ]; then
             PRERELEASE_ARGS=(--prerelease)
           fi
+
+          # workflow_dispatch 时远程可能尚无 tag；--verify-tag 要求 tag 已存在。
+          # 由 tag push 触发时此处为 no-op。用 GITHUB_TOKEN 推 tag 不会再次触发本 workflow。
+          if ! git ls-remote --exit-code --tags origin "refs/tags/${TAG}" >/dev/null 2>&1; then
+            git config user.name "amirieljs-bot"
+            git config user.email "actions@users.noreply.github.com"
+            if ! git rev-parse "${TAG}" >/dev/null 2>&1; then
+              git tag "${TAG}"
+            fi
+            git push origin "${TAG}"
+          fi
+
           if gh release view "${TAG}" >/dev/null 2>&1; then
             echo "Release ${TAG} already exists."
           else
@@ -72,7 +87,7 @@ jobs:
       - name: Dispatch framework package sync
         env:
           TOKEN: ${{ secrets.AMIRIELJS_SYNC_TOKEN }}
-          VERSION: ${{ github.ref_name }}
+          VERSION: v${{ steps.release.outputs.version }}
           NPM_TAG: ${{ steps.release.outputs.npm_tag }}
         run: |
           if [ -z "${TOKEN}" ]; then
