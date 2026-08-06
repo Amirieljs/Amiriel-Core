@@ -3,7 +3,14 @@ import type { AmirielLabels, AmirielLocale } from "./types";
 export const AMIRIEL_DEFAULT_LABELS: Record<AmirielLocale, AmirielLabels> = {
   en: {
     themeLabel: "Reading atmosphere",
-    themes: { midnight: "Midnight envelope", paper: "Warm paper", memorial: "Quiet memorial" },
+    themes: {
+      midnight: "Midnight",
+      paper: "Paper",
+      memorial: "Memorial",
+      dawn: "Dawn",
+      ocean: "Ocean",
+      rose: "Rose",
+    },
     fonts: { system: "System", serif: "Serif", handwritten: "Handwritten" },
     pagesCount: "Pages {count} / {max}",
     paperSizeTitle: "Paper size",
@@ -59,9 +66,12 @@ export const AMIRIEL_DEFAULT_LABELS: Record<AmirielLocale, AmirielLabels> = {
   zh: {
     themeLabel: "\u9605\u8bfb\u6c1b\u56f4",
     themes: {
-      midnight: "\u6df1\u591c\u4fe1\u5c01",
-      paper: "\u6696\u7eb8\u706f\u5149",
-      memorial: "\u5b89\u9759\u7eaa\u5ff5",
+      midnight: "\u6df1\u591c",
+      paper: "\u6696\u7eb8",
+      memorial: "\u7eaa\u5ff5",
+      dawn: "\u6668\u5149",
+      ocean: "\u6ca7\u6d77",
+      rose: "\u857e\u8587",
     },
     fonts: {
       system: "\u7cfb\u7edf\u5b57\u4f53",

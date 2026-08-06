@@ -1,5 +1,5 @@
 export type AmirielLocale = "en" | "zh";
-export type AmirielBuiltinTheme = "midnight" | "paper" | "memorial";
+export type AmirielBuiltinTheme = "midnight" | "paper" | "memorial" | "dawn" | "ocean" | "rose";
 /** Built-in ids or any custom theme id supplied by a host package. */
 export type AmirielTheme = AmirielBuiltinTheme | (string & {});
 export type AmirielFont = "system" | "serif" | "handwritten";

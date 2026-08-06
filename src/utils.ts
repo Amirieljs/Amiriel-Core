@@ -51,6 +51,9 @@ export const AMIRIEL_THEME_DEFAULT_TEXT_COLOR = {
   midnight: "white",
   paper: "black",
   memorial: "white",
+  dawn: "black",
+  ocean: "white",
+  rose: "white",
 } as const satisfies Record<string, AmirielTextColor>;
 
 export const AMIRIEL_FONT_STACKS: Record<AmirielFont, string> = {

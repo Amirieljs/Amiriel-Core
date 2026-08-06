@@ -74,6 +74,57 @@ export const AMIRIEL_BUILTIN_THEME_DEFINITIONS: AmirielThemeDefinition[] = [
       paperMediaBg: "rgba(0, 0, 0, 0.24)",
     },
   },
+  {
+    id: "dawn",
+    swatch: "linear-gradient(135deg, #f3d5b5, #c4785a)",
+    defaultTextColor: "black",
+    vars: {
+      paperBorder: "rgba(196, 120, 90, 0.32)",
+      paperBg:
+        "radial-gradient(circle at 18% 8%, rgba(255, 210, 170, 0.35), transparent 42%), linear-gradient(180deg, #fbf3ea 0%, #f0dcc8 100%)",
+      paperText: "#4a3428",
+      paperHead: "rgba(74, 52, 40, 0.92)",
+      paperDivider: "rgba(196, 120, 90, 0.22)",
+      paperAccent: "rgba(168, 88, 58, 0.88)",
+      paperShadow: "0 20px 48px rgba(120, 72, 48, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.5)",
+      paperMediaBorder: "rgba(168, 88, 58, 0.16)",
+      paperMediaBg: "rgba(255, 255, 255, 0.32)",
+    },
+  },
+  {
+    id: "ocean",
+    swatch: "linear-gradient(135deg, #6a9bb8, #0f1c28)",
+    defaultTextColor: "white",
+    vars: {
+      paperBorder: "rgba(122, 168, 196, 0.28)",
+      paperBg:
+        "radial-gradient(circle at 12% 0%, rgba(122, 168, 196, 0.12), transparent 38%), linear-gradient(180deg, #152430 0%, #0b141c 100%)",
+      paperText: "#d5e6f0",
+      paperHead: "rgba(213, 230, 240, 0.92)",
+      paperDivider: "rgba(122, 168, 196, 0.2)",
+      paperAccent: "rgba(122, 168, 196, 0.88)",
+      paperShadow: "0 20px 48px rgba(0, 0, 0, 0.46), inset 0 1px 0 rgba(122, 168, 196, 0.08)",
+      paperMediaBorder: "rgba(122, 168, 196, 0.16)",
+      paperMediaBg: "rgba(0, 0, 0, 0.24)",
+    },
+  },
+  {
+    id: "rose",
+    swatch: "linear-gradient(135deg, #e8b4c4, #5c2a3a)",
+    defaultTextColor: "white",
+    vars: {
+      paperBorder: "rgba(214, 150, 168, 0.3)",
+      paperBg:
+        "radial-gradient(circle at 14% 0%, rgba(214, 150, 168, 0.14), transparent 40%), linear-gradient(180deg, #2a1820 0%, #160e14 100%)",
+      paperText: "#f0dce4",
+      paperHead: "rgba(240, 220, 228, 0.92)",
+      paperDivider: "rgba(214, 150, 168, 0.22)",
+      paperAccent: "rgba(214, 150, 168, 0.88)",
+      paperShadow: "0 20px 48px rgba(0, 0, 0, 0.46), inset 0 1px 0 rgba(214, 150, 168, 0.08)",
+      paperMediaBorder: "rgba(214, 150, 168, 0.16)",
+      paperMediaBg: "rgba(0, 0, 0, 0.24)",
+    },
+  },
 ];
 
 export const AMIRIEL_BUILTIN_THEME_IDS = AMIRIEL_BUILTIN_THEME_DEFINITIONS.map((theme) => theme.id) as AmirielTheme[];
