@@ -63,6 +63,41 @@ export interface AmirielTextBlock {
   italic?: boolean;
   underline?: boolean;
   color?: AmirielTextColor;
+  /** http, https, or mailto address. The block text is the link label. */
+  href?: string;
+}
+
+export interface AmirielCalloutTargetPage {
+  space: "page";
+  x: number;
+  y: number;
+}
+
+export interface AmirielCalloutTargetPlacement {
+  space: "placement";
+  placementId: string;
+  x: number;
+  y: number;
+}
+
+export type AmirielCalloutTarget = AmirielCalloutTargetPage | AmirielCalloutTargetPlacement;
+
+/** One pointer from a text block to a page point or a point inside a media placement. */
+export interface AmirielCallout {
+  id: string;
+  textBlockId: string;
+  target: AmirielCalloutTarget;
+}
+
+export interface AmirielCalloutStroke {
+  id: string;
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+  targetX: number;
+  targetY: number;
+  head: string;
 }
 
 export interface AmirielPage {
@@ -73,6 +108,7 @@ export interface AmirielPage {
   mediaIds?: string[];
   mediaPlacements?: AmirielMediaPlacement[];
   textBlocks?: AmirielTextBlock[];
+  callouts?: AmirielCallout[];
 }
 
 export interface AmirielMedia {
@@ -132,6 +168,15 @@ export interface AmirielLabels {
   textBlockColor: string;
   textBlockOverflowHint: string;
   textBlockLimit: string;
+  textBlockLink: string;
+  textBlockLinkUrl: string;
+  textBlockLinkApply: string;
+  textBlockLinkClear: string;
+  textBlockLinkInvalid: string;
+  addCallout: string;
+  removeCallout: string;
+  calloutHint: string;
+  calloutTarget: string;
   charCount: string;
   allMediaTitle: string;
   uploadMedia: string;

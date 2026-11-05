@@ -1,5 +1,10 @@
 export type {
   AmirielBuiltinTheme,
+  AmirielCallout,
+  AmirielCalloutStroke,
+  AmirielCalloutTarget,
+  AmirielCalloutTargetPage,
+  AmirielCalloutTargetPlacement,
   AmirielDocument,
   AmirielEditorLimits,
   AmirielFont,
@@ -37,6 +42,7 @@ export {
 } from "./themes";
 
 export {
+  AMIRIEL_DEFAULT_EDITOR_LIMITS,
   AMIRIEL_DEFAULT_PAPER_SIZE,
   AMIRIEL_DEFAULT_PAPER_SIZE_LIMITS,
   AMIRIEL_FONT_OPTIONS,
@@ -45,6 +51,8 @@ export {
   AMIRIEL_TEXT_COLOR_OPTIONS,
   AMIRIEL_THEME_DEFAULT_TEXT_COLOR,
   AMIRIEL_THEME_OPTIONS,
+  calloutStrokes,
+  calloutTargetFromPagePoint,
   clamp,
   combinedPageText,
   createAmirielId,
@@ -53,10 +61,13 @@ export {
   heightPercentForWidth,
   mediaAspectRatio,
   mediaSizeWithinPaper,
+  normalizeCallouts,
   normalizeDocument,
+  normalizeEditorLimits,
   normalizeMediaPlacements,
   normalizePaperSize,
   normalizePaperSizeLimits,
+  normalizeTextHref,
   normalizePlacement,
   normalizeTextBlock,
   normalizeTextBlocks,

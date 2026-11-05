@@ -1,5 +1,9 @@
 import type {
+  AmirielCallout,
+  AmirielCalloutStroke,
+  AmirielCalloutTarget,
   AmirielDocument,
+  AmirielEditorLimits,
   AmirielFont,
   AmirielIdFactory,
   AmirielMedia,
@@ -39,6 +43,12 @@ export const AMIRIEL_TEXT_COLORS: Record<AmirielTextColor, string> = {
 export const AMIRIEL_TEXT_COLOR_OPTIONS = Object.keys(AMIRIEL_TEXT_COLORS) as AmirielTextColor[];
 export const AMIRIEL_FONT_OPTIONS: AmirielFont[] = ["system", "serif", "handwritten"];
 export const AMIRIEL_THEME_OPTIONS = AMIRIEL_BUILTIN_THEME_IDS;
+export const AMIRIEL_DEFAULT_EDITOR_LIMITS: Required<AmirielEditorLimits> = {
+  maxPages: 20,
+  maxTextBlocksPerPage: 4,
+  maxImages: 3,
+  maxVideos: 1,
+};
 export const AMIRIEL_DEFAULT_PAPER_SIZE: AmirielPaperSize = { width: 720, height: 520 };
 export const AMIRIEL_DEFAULT_PAPER_SIZE_LIMITS: Required<AmirielPaperSizeLimits> = {
   minWidth: 320,
@@ -94,6 +104,51 @@ function positiveInteger(value: unknown, fallback: number) {
   const next = Number(value);
   if (!Number.isFinite(next) || next <= 0) return fallback;
   return Math.round(next);
+}
+
+function nonNegativeInteger(value: unknown, fallback: number) {
+  const next = Number(value);
+  if (!Number.isFinite(next) || next < 0) return fallback;
+  return Math.round(next);
+}
+
+export function normalizeEditorLimits(limits?: AmirielEditorLimits): Required<AmirielEditorLimits> {
+  return {
+    maxPages: nonNegativeInteger(limits?.maxPages, AMIRIEL_DEFAULT_EDITOR_LIMITS.maxPages),
+    maxTextBlocksPerPage: nonNegativeInteger(limits?.maxTextBlocksPerPage, AMIRIEL_DEFAULT_EDITOR_LIMITS.maxTextBlocksPerPage),
+    maxImages: nonNegativeInteger(limits?.maxImages, AMIRIEL_DEFAULT_EDITOR_LIMITS.maxImages),
+    maxVideos: nonNegativeInteger(limits?.maxVideos, AMIRIEL_DEFAULT_EDITOR_LIMITS.maxVideos),
+  };
+}
+
+const MAX_TEXT_HREF_LENGTH = 2000;
+
+interface AbsoluteHref {
+  protocol: string;
+  pathname: string;
+  toString(): string;
+}
+
+function parseAbsoluteHref(value: string): AbsoluteHref | undefined {
+  const UrlCtor = (globalThis as { URL?: new (input: string) => AbsoluteHref }).URL;
+  if (!UrlCtor) return undefined;
+  try {
+    return new UrlCtor(value);
+  } catch {
+    return undefined;
+  }
+}
+
+export function normalizeTextHref(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const href = value.trim();
+  if (!href || href.length > MAX_TEXT_HREF_LENGTH) return undefined;
+  const url = parseAbsoluteHref(href);
+  if (!url) return undefined;
+  const protocol = url.protocol.toLowerCase();
+  if (protocol !== "http:" && protocol !== "https:" && protocol !== "mailto:") return undefined;
+  if (protocol === "mailto:" && !url.pathname) return undefined;
+  return url.toString();
 }
 
 function normalizeRawPaperSize(value: Partial<AmirielPaperSize> | undefined, fallback: AmirielPaperSize): AmirielPaperSize {
@@ -168,6 +223,7 @@ export function mediaSizeWithinPaper(
 }
 
 export function normalizeTextBlock(block: AmirielTextBlock, index = 0): AmirielTextBlock {
+  const href = normalizeTextHref(block.href);
   return {
     id: block.id,
     x: clamp(block.x, 0, 92),
@@ -182,6 +238,7 @@ export function normalizeTextBlock(block: AmirielTextBlock, index = 0): AmirielT
     ...(block.italic ? { italic: true } : {}),
     ...(block.underline ? { underline: true } : {}),
     ...(block.color && AMIRIEL_TEXT_COLOR_OPTIONS.includes(block.color) ? { color: block.color } : {}),
+    ...(href ? { href } : {}),
   };
 }
 
@@ -254,6 +311,132 @@ export function normalizeMediaPlacements(
   });
 }
 
+export function normalizeCallouts(page: AmirielPage): AmirielCallout[] {
+  const blockIds = new Set((page.textBlocks ?? []).map((block) => block.id));
+  const placements = page.mediaPlacements ?? [];
+  const seenBlocks = new Set<string>();
+  const callouts: AmirielCallout[] = [];
+  for (const raw of page.callouts ?? []) {
+    if (!raw?.id || !raw.textBlockId || seenBlocks.has(raw.textBlockId) || !blockIds.has(raw.textBlockId)) continue;
+    const target = normalizeCalloutTarget(raw.target, placements);
+    if (!target) continue;
+    seenBlocks.add(raw.textBlockId);
+    callouts.push({ id: raw.id, textBlockId: raw.textBlockId, target });
+  }
+  return callouts;
+}
+
+function normalizeCalloutTarget(value: unknown, placements: AmirielMediaPlacement[]): AmirielCalloutTarget | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const target = value as Record<string, unknown>;
+  const x = Number(target.x);
+  const y = Number(target.y);
+  if (!Number.isFinite(x) || !Number.isFinite(y)) return undefined;
+  if (target.space === "page") return { space: "page", x: clamp(x, 0, 100), y: clamp(y, 0, 100) };
+  if (target.space === "placement" && typeof target.placementId === "string" && placements.some((placement) => placement.id === target.placementId)) {
+    return { space: "placement", placementId: target.placementId, x: clamp(x, 0, 100), y: clamp(y, 0, 100) };
+  }
+  return undefined;
+}
+
+export function resolveCalloutPoint(callout: AmirielCallout, page: AmirielPage) {
+  const target = callout.target;
+  if (target.space === "page") return { x: target.x, y: target.y };
+  const placement = page.mediaPlacements?.find((item) => item.id === target.placementId);
+  if (!placement || placement.width <= 0 || placement.height <= 0) return null;
+  return {
+    x: placement.x + (target.x / 100) * placement.width,
+    y: placement.y + (target.y / 100) * placement.height,
+  };
+}
+
+export function calloutAnchorOnTextBlock(block: AmirielTextBlock, targetX: number, targetY: number) {
+  const height = block.height || 22;
+  const left = block.x;
+  const top = block.y;
+  const right = left + block.width;
+  const bottom = top + height;
+  const centerX = (left + right) / 2;
+  const centerY = (top + bottom) / 2;
+  const dx = targetX - centerX;
+  const dy = targetY - centerY;
+  if (Math.abs(dx) < 0.001 && Math.abs(dy) < 0.001) return { x: right, y: centerY };
+  let scale = Number.POSITIVE_INFINITY;
+  if (dx > 0) scale = Math.min(scale, (right - centerX) / dx);
+  else if (dx < 0) scale = Math.min(scale, (left - centerX) / dx);
+  if (dy > 0) scale = Math.min(scale, (bottom - centerY) / dy);
+  else if (dy < 0) scale = Math.min(scale, (top - centerY) / dy);
+  if (!Number.isFinite(scale) || scale < 0) return { x: right, y: centerY };
+  return { x: centerX + dx * scale, y: centerY + dy * scale };
+}
+
+export function calloutTargetFromPagePoint(page: AmirielPage, x: number, y: number): AmirielCalloutTarget {
+  const placements = [...(page.mediaPlacements ?? [])].sort((a, b) => b.z - a.z);
+  for (const placement of placements) {
+    const height = placement.height || 0;
+    if (height <= 0 || placement.width <= 0) continue;
+    const inside = x >= placement.x
+      && x <= placement.x + placement.width
+      && y >= placement.y
+      && y <= placement.y + height;
+    if (!inside) continue;
+    return {
+      space: "placement",
+      placementId: placement.id,
+      x: clamp(((x - placement.x) / placement.width) * 100, 0, 100),
+      y: clamp(((y - placement.y) / height) * 100, 0, 100),
+    };
+  }
+  return { space: "page", x: clamp(x, 0, 100), y: clamp(y, 0, 100) };
+}
+
+const CALLOUT_ARROW_LENGTH = 9;
+
+function pointAlong(x1: number, y1: number, x2: number, y2: number, distance: number) {
+  const length = Math.hypot(x2 - x1, y2 - y1) || 1;
+  const scale = distance / length;
+  return { x: x1 + (x2 - x1) * scale, y: y1 + (y2 - y1) * scale };
+}
+
+function arrowHeadPath(fromX: number, fromY: number, tipX: number, tipY: number, size: number) {
+  const angle = Math.atan2(tipY - fromY, tipX - fromX);
+  const wing = Math.PI / 7;
+  const leftX = tipX - size * Math.cos(angle - wing);
+  const leftY = tipY - size * Math.sin(angle - wing);
+  const rightX = tipX - size * Math.cos(angle + wing);
+  const rightY = tipY - size * Math.sin(angle + wing);
+  return `M ${tipX} ${tipY} L ${leftX} ${leftY} L ${rightX} ${rightY} Z`;
+}
+
+export function calloutStrokes(page: AmirielPage | undefined, paperWidth: number, paperHeight: number): AmirielCalloutStroke[] {
+  if (!page || paperWidth <= 0 || paperHeight <= 0) return [];
+  const strokes: AmirielCalloutStroke[] = [];
+  for (const callout of page.callouts ?? []) {
+    const block = page.textBlocks?.find((item) => item.id === callout.textBlockId);
+    const point = block ? resolveCalloutPoint(callout, page) : null;
+    if (!block || !point) continue;
+    const anchor = calloutAnchorOnTextBlock(block, point.x, point.y);
+    const x1 = (anchor.x / 100) * paperWidth;
+    const y1 = (anchor.y / 100) * paperHeight;
+    const x2 = (point.x / 100) * paperWidth;
+    const y2 = (point.y / 100) * paperHeight;
+    const length = Math.hypot(x2 - x1, y2 - y1);
+    if (length < 4) continue;
+    const lineEnd = pointAlong(x1, y1, x2, y2, Math.max(0, length - CALLOUT_ARROW_LENGTH * 0.55));
+    strokes.push({
+      id: callout.id,
+      x1,
+      y1,
+      x2: lineEnd.x,
+      y2: lineEnd.y,
+      targetX: x2,
+      targetY: y2,
+      head: arrowHeadPath(x1, y1, x2, y2, CALLOUT_ARROW_LENGTH),
+    });
+  }
+  return strokes;
+}
+
 export function combinedPageText(page?: AmirielPage) {
   if (!page) return "";
   const blocks = page.textBlocks ?? [];
@@ -293,6 +476,7 @@ export function normalizeDocument(
     mediaIds: [],
     mediaPlacements: [],
     textBlocks: [],
+    callouts: [],
   }];
   const pages = raw.pages?.length ? raw.pages : fallbackPages;
 
@@ -310,9 +494,11 @@ export function normalizeDocument(
         mediaIds: page.mediaIds || [],
         mediaPlacements: page.mediaPlacements || [],
         textBlocks: page.textBlocks || [],
+        callouts: page.callouts || [],
       };
       normalizedPage.mediaPlacements = normalizeMediaPlacements(normalizedPage, media, paper, createId);
       normalizedPage.textBlocks = normalizeTextBlocks(normalizedPage);
+      normalizedPage.callouts = normalizeCallouts(normalizedPage);
       syncPageText(normalizedPage);
       return normalizedPage;
     }),
