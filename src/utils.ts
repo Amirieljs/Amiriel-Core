@@ -222,6 +222,48 @@ export function mediaSizeWithinPaper(
   return { width, height };
 }
 
+/** Blank paper may create a text block only while the page has no text blocks and no media. */
+export function canPlaceFirstTextBlock(page?: Pick<AmirielPage, "textBlocks" | "mediaPlacements"> | null) {
+  return (page?.textBlocks?.length ?? 0) === 0 && (page?.mediaPlacements?.length ?? 0) === 0;
+}
+
+export function nextPageZ(page: Pick<AmirielPage, "textBlocks" | "mediaPlacements">) {
+  return Math.max(
+    0,
+    ...(page.mediaPlacements ?? []).map((placement) => placement.z),
+    ...(page.textBlocks ?? []).map((block) => block.z),
+  ) + 1;
+}
+
+export interface CreateTextBlockOptions {
+  id: string;
+  /** Page percent. Omit both to use the default slot for a toolbar add. */
+  x?: number;
+  y?: number;
+  font?: AmirielFont;
+  fontSize?: number;
+  color?: AmirielTextColor;
+}
+
+export function createTextBlock(
+  page: Pick<AmirielPage, "textBlocks" | "mediaPlacements">,
+  options: CreateTextBlockOptions,
+): AmirielTextBlock {
+  const pointed = options.x != null && options.y != null;
+  return {
+    id: options.id,
+    x: pointed ? clamp(options.x ?? 0, 0, 78) : 8,
+    y: pointed ? clamp(options.y ?? 0, 0, 88) : 28,
+    width: 42,
+    height: 18,
+    text: "",
+    z: nextPageZ(page),
+    fontSize: options.fontSize ?? 16,
+    ...(options.font ? { font: options.font } : {}),
+    ...(options.color ? { color: options.color } : {}),
+  };
+}
+
 export function normalizeTextBlock(block: AmirielTextBlock, index = 0): AmirielTextBlock {
   const href = normalizeTextHref(block.href);
   return {

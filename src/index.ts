@@ -1,3 +1,5 @@
+export type { CreateTextBlockOptions } from "./utils";
+
 export type {
   AmirielBuiltinTheme,
   AmirielCallout,
@@ -53,7 +55,10 @@ export {
   AMIRIEL_THEME_OPTIONS,
   calloutStrokes,
   calloutTargetFromPagePoint,
+  canPlaceFirstTextBlock,
   clamp,
+  createTextBlock,
+  nextPageZ,
   combinedPageText,
   createAmirielId,
   fallbackHeightPercent,
